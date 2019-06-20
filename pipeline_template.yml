@@ -8,9 +8,9 @@ Metadata:
   Licence: Apache 2.0
 
 Parameters:
-  LayerName:
+  PackageName:
     Type: String
-  ArtifactsBucketName:
+  LayerName:
     Type: String
   GitHubRepo:
     Type: String
@@ -27,7 +27,7 @@ Resources:
   ArtifactsBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub '${ArtifactsBucketName}.${AWS::Region}'
+      BucketName: !Sub '${LayerName}.${AWS::Region}'
   CloudformationRole:
     Type: AWS::IAM::Role
     Properties:
@@ -164,6 +164,9 @@ Resources:
           - Name: BUCKET_NAME
             Type: PLAINTEXT
             Value: !Ref ArtifactsBucket
+          - Name: PACKAGE_NAME
+            Type: PLAINTEXT
+            Value: !Ref PackageName
           - Name: LAYER_NAME
             Type: PLAINTEXT
             Value: !Ref LayerName
@@ -238,9 +241,9 @@ Resources:
       AuthenticationConfiguration:
         SecretToken: !Ref 'GitHubOAuthToken'
       Filters:
-        - JsonPath: ".$ref"
+        - JsonPath: ".$refs"
           MatchEquals: ".$refs/tags/*"
-      Name: !Sub '${AWS::StackName}-NewTagPushed'
+      Name: !Sub '${LayerName}-NewTagPushed'
       RegisterWithThirdParty: True
       TargetAction: SourceCode
       TargetPipeline: !Ref Pipeline

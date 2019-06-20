@@ -19,7 +19,8 @@ VENV 			?= .venv
 VENV_ACTIVATE		=. $(VENV)/bin/activate
 
 REPODIR 		?= $(shell bash -i -c 'read -e -p "Path to your repo: " path; echo $$path')
-PACKAGENAME		?= $(shell bash -c 'read -p "Package / Layer name: " layer; echo $$layer')
+PACKAGENAME		?= $(shell bash -c 'read -p "Package name: " package; echo $$package')
+LAYERNAME		?= $(shell bash -c 'read -p "Layer name: " layer; echo $$layer')
 
 GITHUB_OWNER		?= $(shell bash -c 'read -p "Owner name: " owner; echo $$owner')
 GITHUB_REPO		?= $(shell bash -c 'read -p "Repo name: " repo; echo $$repo')
@@ -57,7 +58,8 @@ parameters		:
 create-parameters	: venv $(VENV_ACTIVATE)
 			$(PYTHON) create_params.py --owner $(GITHUB_OWNER) \
 			--repo $(GITHUB_REPO) --branch $(GITHUB_BRANCH) \
-			--token $(GITHUB_TOKEN) --layer-name $(PACKAGENAME)
+			--token $(GITHUB_TOKEN) --layer-name $(LAYERNAME) \
+			--package-name $(PACKAGENAME)
 
 
 ## clean-parameters: Delete parameters
@@ -73,21 +75,21 @@ install			:
 ## create: create CFN stack
 
 create			: $(VENV_ACTIVATE) validate parameters
-			$(AWS) cloudformation create-stack --stack-name lambda-layer-$(PACKAGENAME) \
+			$(AWS) cloudformation create-stack --stack-name lambda-layer-$(LAYERNAME) \
 			--template-body file://pipeline_template.yml \
-			--capabilities CAPABILITY_IAM --parameters layer_params.json
+			--capabilities CAPABILITY_IAM --parameters file://layer_params.json
 
 # update: Update the CFN stack
 
 update			: $(VENV_ACTIVATE) validate
-			$(AWS) cloudformation update-stack --stack-name lambda-layer-$(PACKAGENAME) \
+			$(AWS) cloudformation update-stack --stack-name lambda-layer-$(LAYERNAME) \
 			--template-body file://pipeline_template.yml \
-			--capabilities CAPABILITY_IAM
+			--capabilities CAPABILITY_IAM --parameters file://layer_params.json
 
 ## delete: Delete the CFN stack
 
 delete			: $(VENV_ACTIVATE)
-			$(AWS) cloudformation delete-stack --stack-name lambda-layer-$(PACKAGENAME)
+			$(AWS) cloudformation delete-stack --stack-name lambda-layer-$(LAYERNAME)
 
 ## validate: Validate the CFN template
 
@@ -99,7 +101,7 @@ validate		: $(VENV_ACTIVATE)
 
 events			: $(VENV_ACTIVATE)
 			$(AWS) cloudformation describe-stack-events \
-			--stack-name lambda-layer-$(PACKAGENAME) \
+			--stack-name lambda-layer-$(LAYERNAME) \
 			--region $(AWS_REGION)
 
 ## watch: watch describe-events

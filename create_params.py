@@ -9,26 +9,25 @@ PARSER.add_argument('--repo', required=True)
 PARSER.add_argument('--branch', required=True)
 PARSER.add_argument('--token', required=True)
 PARSER.add_argument('--layer-name', required=True)
-
+PARSER.add_argument('--package-name', required=True)
 
 ARGS = PARSER.parse_args()
-
 PARAMS = [
     {
         "ParameterKey": "LayerName",
         "ParameterValue": ARGS.layer_name
     },
     {
-        "ParameterKey": "GitHubOwner",
-        "ParameterValue": ARGS.owner
+        "ParameterKey": "PackageName",
+        "ParameterValue": ARGS.package_name
     },
     {
         "ParameterKey": "BranchName",
         "ParameterValue": ARGS.branch
     },
     {
-        "ParameterKey": "ArtifactsBucketName",
-        "ParameterValue": ARGS.layer_name.lower()
+        "ParameterKey": "GitHubOwner",
+        "ParameterValue": ARGS.owner
     },
     {
         "ParameterKey": "GitHubRepo",
